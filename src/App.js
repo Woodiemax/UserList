@@ -5,6 +5,7 @@ import Table from './components/Table/Table';
 import Loader from './components/Loader/Loader';
 import SearchPanel from './components/SearchPanel/SearchPanel';
 import Pagination from './components/Pagination/Pagination';
+import UserDetailRow from './components/UserDetailRow/UserDetailRow';
 
 const App = () => {
 	const userData = new UserData();
@@ -15,13 +16,13 @@ const App = () => {
 		sortType: 'asc',
 		arrowColorLeft: null,
 		arrowColorRight: null,
-		term: '',
+		sortField: null,
 	});
-	const [term, SetTerm] = useState('');
+	// const [term, SetTerm] = useState('');
 	const [currentPage, SetCurrentPage] = useState(1);
 	const [userListPerPage, SetUserListPerPage] = useState(50);
 	const [userAddInputs, SetuserAddInputs] = useState(true);
-
+	const [userRowDetail, setUserRowDetail] = useState(null);
 	const loadSmallData = async () => {
 		SetParams({
 			userList: [],
@@ -33,6 +34,7 @@ const App = () => {
 			loading: false,
 			arrowColorLeft: 'red',
 		});
+		setUserRowDetail(null);
 	};
 
 	const loadBigData = async () => {
@@ -46,6 +48,7 @@ const App = () => {
 			userList: arr,
 			arrowColorRight: 'red',
 		});
+		setUserRowDetail(null);
 	};
 
 	const onSort = (field) => {
@@ -62,26 +65,42 @@ const App = () => {
 			...params,
 			userList: sortedArr,
 			sortType: params.sortType === 'asc' ? 'desc' : 'asc',
+			sortField: field,
 		});
 	};
+
+	// const onSearching = (word) => {
+	// 	SetTerm(word);
+	// };
 
 	const onSearching = (word) => {
-		SetTerm(word);
+		SetParams({
+			...params,
+			userList: word,
+		});
 	};
 
-	const search = (rows) => {
-		const columns = rows[0] && Object.keys(rows[0]);
-		if (term.length === 0) return rows;
-		const a = rows.filter((row) => {
-			return columns.some((column) => {
-				return (
-					row[column].toString().toLowerCase().indexOf(term.toLowerCase()) > -1
-				);
-			});
-		});
-		console.log(a);
-		return a;
-	};
+	// const search = (rows) => {
+	// 	const columns = rows[0] && Object.keys(rows[0]);
+	// 	if (term.length === 0) return rows;
+	// 	const a = rows.filter((row) => {
+	// 		return columns.some((column) => {
+	// 			return (
+	// 				row[column].toString().toLowerCase().indexOf(term.toLowerCase()) > -1
+	// 			);
+	// 		});
+	// 	});
+
+	// 	// setTimeout(() => {
+	// 	// 	console.log(1);
+	// 	// }, 1000);
+
+	// 	console.log(a.length);
+	// 	SetParams({
+	// 		userList: a,
+	// 	});
+	// 	// return a;
+	// };
 
 	const indexOfLastUserList = currentPage * userListPerPage;
 	const indexofFirstUselList = indexOfLastUserList - userListPerPage;
@@ -115,7 +134,12 @@ const App = () => {
 		});
 	};
 
-	const visiblePosts = search(currentUsersList);
+	const userDetail = (user) => {
+		setUserRowDetail(user);
+	};
+
+	// const visibleUsersPage = search(currentUsersList);
+	const visibleUsersPage = currentUsersList;
 
 	return (
 		<div className='conteiner'>
@@ -131,23 +155,36 @@ const App = () => {
 					Большой объем данных
 				</button>
 			</div>
-			<SearchPanel onSearching={onSearching} />
-			<select>
-				<option>123</option>
-			</select>
+			<SearchPanel
+				onSearching={onSearching}
+				// data={visibleUsersPage}
+				data={params.userList}
+			/>
+			{/* <select>
+				<option value='grapefruit'>Грейпфрут</option>
+				<option value='lime'>Лайм</option>
+				<option selected value='coconut'>
+					Кокос
+				</option>
+				<option value='mango'>Манго</option>
+			</select> */}
 			{params.loading ? (
 				<Loader />
 			) : (
 				<>
 					<Table
-						data={visiblePosts}
+						data={visibleUsersPage}
 						onSort={onSort}
 						userAddInputs={userAddInputs}
 						showForm={showForm}
 						onAddUser={onAddUser}
 						SetParams={SetParams}
 						deleteUsers={deleteUsers}
+						sortArrow={params.sortType}
+						sortField={params.sortField}
+						onUserDetailRow={userDetail}
 					/>
+					{userRowDetail ? <UserDetailRow user={userRowDetail} /> : null}
 				</>
 			)}
 			{params.userList.length > userListPerPage ? (

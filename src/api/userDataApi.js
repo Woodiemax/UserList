@@ -13,7 +13,7 @@ class UserData {
 			throw new Error('Что-то пошло не так! Проверьте данные!');
 		}
 		return await res.json();
-	}
+	} 
 
 	getSmallData() {
 		return this.getUserData('32&id={number|1000}&firstName={firstName}');
